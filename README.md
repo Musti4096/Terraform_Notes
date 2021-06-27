@@ -164,12 +164,44 @@ resource "docker_container" "nginx_container" {
 
 ## Variable Validation
 
-```bash
+- if we need validate our variables that we use with terraform
+
+```hcl
+variable "int_port" {
+  type = number
+  default = 8080
+
+  validation {
+    condition = var.int_port == 8080
+    error_message = "The internal port must be 8080"
+  }
+}
+
+variable "ext_port" {
+  type = number
+  default = 8080
+
+  validation {
+    condition = var.ext_port <= 65535 && var.ext_port > 0
+    error_message = "The external port must be in the valid port range 0 - 65535"
+  }
+}
 
 ```
 
-```bash
+## Sensitive Variables
 
+we create terrafor.tfvars file, and add sensetive variables into the this file.
+
+## Variable Definition Precedence
+
+- If we have two tfvars file, and consist of different values for same variable depends on department or region.
+  Terraform uses terraform.tfvars as default, if we want to use another tfvars file then we should define it on cli as below
+
+```bash
+terraform apply --var-file dev_env.tfvars
+terraform apply --var-file test_env.tfvars
+terraform apply --var-file prod_env.tfvars
 ```
 
 ```bash
