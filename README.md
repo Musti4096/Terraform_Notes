@@ -264,6 +264,180 @@ terraform apply -lock=false #we just unlock the state
 terraform import docker_container.nginx_container-2 $(docker inspect -f {{.ID}} nginx-yrwl)
 ```
 
+## Terraform Refresh and Terraform State rm
+
+[Terraform Refresh](https://www.terraform.io/docs/cli/commands/refresh.html)
+
+- The terraform refresh command reads the current settings from all managed remote objects and updates the Terraform state to match.
+
+-This won't modify your real remote objects, but it will modify the the Terraform state.
+
+```bash
+terraform refresh
+
+terraform refresh -target random_string.random #just targeted specific resources
+```
+
+[Terraform State rm](https://www.terraform.io/docs/cli/commands/state/rm.html)
+
+- if someone delete our resources that we keep them state file,
+  and we want to update our state file. In thias case we can use
+  terraform state rm command. just remove deleted resources from state file.
+
+```bash
+terraform state rm random_string.random[1]
+```
+
+## Terraform Variables
+
+[Variables ](https://www.terraform.io/docs/language/values/variables.html)
+
+```hcl
+terraform {
+  required_providers {
+    docker = {
+      source = "kreuzwerker/docker"
+    }
+  }
+}
+
+provider "docker" {}
+
+variable "ext_port" {
+  type    = number
+  default = 80
+}
+
+variable "int_port" {
+  type    = number
+  default = 80
+}
+
+variable "container_count" {
+  type    = number
+  default = 1
+}
+
+resource "docker_image" "nginx_image" {
+  name = "nginx:alpine"
+}
+
+resource "random_string" "random" {
+  count   = 1
+  length  = 4
+  special = false
+  upper   = false
+}
+
+
+resource "docker_container" "nginx_container" {
+  count = var.container_count
+  name  = join("-", ["nginx", random_string.random[count.index].result])
+  image = docker_image.nginx_image.latest
+  ports {
+    internal = var.int_port
+    external = var.ext_port
+  }
+}
+
+output "IP-Address" {
+  value       = [for i in docker_container.nginx_container[*] : join(":", [i.ip_address], i.ports[*]["external"])]
+  description = "IP address of container"
+}
+
+output "container-name" {
+  value = docker_container.nginx_container[*].name
+}
+```
+
+## Variable Validation
+
+[Custom Variable Rules](https://www.terraform.io/docs/language/values/variables.html#custom-validation-rules)
+
+```hcl
+variable "ext_port" {
+  type    = number
+  default = 80
+  validation {
+    condition     = var.ext_port == 80
+    error_message = "The External port must be 80."
+  }
+}
+```
+
+```bash
+Error: Invalid value for variable
+
+  on main.tf line 11:
+  11: variable "ext_port" {
+
+The External port must be 80.
+
+This was checked by the validation rule at main.tf:14,3-13.
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
 []()
 
 ```hcl
