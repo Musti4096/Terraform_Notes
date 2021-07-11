@@ -1,50 +1,152 @@
 # Terraform Notes
 
-## join Function
+## Terraform Lock Hcl file
 
-    - we can join two values with this function
+it locks all versions for us.
+
+## Terraform plan and apply
 
 ```bash
-join("seperator", [value1, value2, "str"])
+terraform plan -out=plan1 # we define our plan as plan1
 
-join(":", [docker_container.nginx_container.ip_address, docker_container.nginx_container.ports[0].external] )
+terraform apply plan1 # execute our plan wihtout confirmation
 ```
 
-## random function
+## Terraform State
+
+- we cna store our state file in our local machine, remote state ( blob or terraform cloud)
+
+```bash
+terraform show -json #it shows our state file with json format
+
+terraform state list #list the resources that we created
+```
+
+## Terraform Console
+
+- we use console for some testing issues
+
+```bash
+terraform console # we can enter console
+
+docker_container.nginx_container.ip_address #we can reach container ip address.
+```
+
+## Terraform Output
+
+[Terraform Outputs](https://www.terraform.io/docs/language/values/outputs.html)
+
+- it gives us some information about our resources
+  and we can consume them in another resource
 
 ```hcl
-resource "random_string" "random" {
-  length           = 8
-  special          = true
-  upper            = false
+output "IP-Address" {
+  value       = docker_container.nginx_container.ip_address
+  description = "IP address of container"
+}
+
+output "container-name" {
+  value = docker_container.nginx_container.name
 }
 ```
 
-example
+```bash
+terraform output #with that command we can see all outputs
+```
+
+## Terraform Functions
+
+[Terraform Functions](https://www.terraform.io/docs/language/functions/index.html)
+
+### Join Function
+
+[Join Function](https://www.terraform.io/docs/language/functions/join.html)
 
 ```hcl
+join (seperator, list)
+
+join ", ", ["foo", "bar", "baz"]
+
+```
+
+```bash
+join(":", [docker_container.nginx_container.ip_address, docker_container.nginx_container.ports[0].external]) #we can join ip address and ports then use it in output
+```
+
+## Terraform Random Resources
+
+[Random Resource](https://registry.terraform.io/providers/hashicorp/random/latest/docs)
+
+```hcl
+resource "random_string" "random" {
+  length           = 16
+  special          = true
+  override_special = "/@£$"
+}
+```
+
+```hcl
+terraform {
+  required_providers {
+    docker = {
+      source = "kreuzwerker/docker"
+    }
+  }
+}
+provider "docker" {}
+
+resource "docker_image" "nginx_image" {
+  name = "nginx:alpine"
+}
+
 resource "random_string" "random" {
   length  = 4
   special = false
   upper   = false
 }
 
+resource "random_string" "random2" {
+  length  = 4
+  special = false
+  upper   = false
+}
+
 resource "docker_container" "nginx_container" {
-  image = docker_image.nginx.latest
-  name  = join("-", ["nginx-container", random_string.random.result])
+  name  = join("-", ["nginx", random_string.random.result])
+  image = docker_image.nginx_image.latest
   ports {
-    internal = 80
-    #external = 80
+    internal = "80"
+    # external = "80"
   }
 }
+
+resource "docker_container" "nginx_container2" {
+  name  = join("-", ["nginx", random_string.random2.result])
+  image = docker_image.nginx_image.latest
+  ports {
+    internal = "80"
+    # external = "80"
+  }
+}
+
+output "IP-Address" {
+  value       = join(":", [docker_container.nginx_container.ip_address, docker_container.nginx_container.ports[0].external])
+  description = "IP address of container"
+}
+
+output "container-name" {
+  value = docker_container.nginx_container.name
+}
+
+output "container-name-2" {
+  value = docker_container.nginx_container2.name
+}
+
 ```
 
-## count.index
+## Multiple Resources and Count
 
-- We could create multiple resources using just one resource code
-  and we can launch all values using count.index function
-
-- Example
+[Terraform Count](https://www.terraform.io/docs/language/meta-arguments/count.html)
 
 ```hcl
 resource "random_string" "random" {
@@ -52,167 +154,139 @@ resource "random_string" "random" {
   length  = 4
   special = false
   upper   = false
-
 }
 
-# Create a container
-resource "docker_container" "nginx_container" {
-  count = 2
-  image = docker_image.nginx.latest
-  name  = join("-", ["nginx-container", random_string.random[count.index].result])
-  ports {
-    internal = 80
-    #external = 80
-  }
-}
-```
-
-## Splat Expression
-
-we could return all values from list ( multiple resource's attributes) using splat expression
-
-```hcl
-output "container_name" {
- value       = docker_container.nginx_container[*].name
- description = "The ip address of nginx container"
-}
-```
-
-## for loops in terraform
-
-- Getting values from list using for loops
-- Example
-
-```hcl
-output "ip_address" {
-  value       = [for i in docker_container.nginx_container[*]: join(":", [i.ip_address], i.ports[*]["internal"])]
-  description = "The name of nginx container1"
-}
-output "container_name" {
- value       = docker_container.nginx_container[*].name
- description = "The ip address of nginx container"
-}
-```
-
-## Taint in Terraform
-
-- when we need force to replace any resource
-
-```bash
-terraform taint <resource name>
-
-terraform taint resource.random_string[1].name
-```
-
-## State Locking , Break the state
-
-```bash
-terraform apply --auto-approve -lock=false # we unlock the state, and any one can change our state
-# -lock=true is default value
-```
-
-- if the state and resource code conflicts, then we inspect state list and code.
-  if we need we just add extra code, then use terraform import
-
-## Terraform import
-
-```bash
-terraform import <resource id>
-```
-
-## Terraform Refresh and State rm
-
-- We can update our state file with refresh command
-
-```bash
-terraform refresh #refresh all resources
-
-terraform refresh -target docker_container.busyboy_container # refresh just mentioned resources
-```
-
--delete one of resources from state file
-
-```bash
-terraform state rm random_string.random[1]
-```
-
-## Variables
-
-```bash
-TF_VAR_ext_port=8080 # we can export variable from cli
-
-terraform apply --auto-approve -var ext_port=8080 # we could define variable with apply command
 ```
 
 ```hcl
-variable "ext_port" {
-  type = number
-  default = 8080
+resource "docker_image" "nginx_image" {
+  name = "nginx:alpine"
+}
+
+resource "random_string" "random" {
+  count   = 2
+  length  = 4
+  special = false
+  upper   = false
 }
 
 
 resource "docker_container" "nginx_container" {
-  count = 1
-  image = docker_image.nginx.latest
-  name  = join("-", ["nginx-container", random_string.random[count.index].result])
+  count = 2
+  name  = join("-", ["nginx", random_string.random[count.index].result])
+  image = docker_image.nginx_image.latest
   ports {
-    internal = 80
-    external = var.ext_port
+    internal = "80"
+    # external = "80"
   }
+}
+
+
+output "IP-Address" {
+  value       = join(":", [docker_container.nginx_container[0].ip_address, docker_container.nginx_container[0].ports[0].external])
+  description = "IP address of container"
+}
+
+output "container-name" {
+  value = docker_container.nginx_container[0].name
+}
+
+output "container2-name" {
+  value = docker_container.nginx_container[1].name
 }
 ```
 
-## Variable Validation
+## The Splat Expression
 
-- if we need validate our variables that we use with terraform
+[The Splat Expression](https://www.terraform.io/docs/language/expressions/splat.html)
 
 ```hcl
-variable "int_port" {
-  type = number
-  default = 8080
 
-  validation {
-    condition = var.int_port == 8080
-    error_message = "The internal port must be 8080"
-  }
-}
-
-variable "ext_port" {
-  type = number
-  default = 8080
-
-  validation {
-    condition = var.ext_port <= 65535 && var.ext_port > 0
-    error_message = "The external port must be in the valid port range 0 - 65535"
-  }
+output "container-name" {
+  value = docker_container.nginx_container[*].name
 }
 
 ```
 
-## Sensitive Variables
+## For Loops
 
-we create terrafor.tfvars file, and add sensetive variables into the this file.
+[For Expression](https://www.terraform.io/docs/language/expressions/for.html)
 
-## Variable Definition Precedence
+```hcl
 
-- If we have two tfvars file, and consist of different values for same variable depends on department or region.
-  Terraform uses terraform.tfvars as default, if we want to use another tfvars file then we should define it on cli as below
+output "IP-Address" {
+  value       = [for i in docker_container.nginx_container[*] : join(":", [i.ip_address], i.ports[*]["external"])]
+  description = "IP address of container"
+}
+
+output "container-name" {
+  value = docker_container.nginx_container[*].name
+}
+
+```
 
 ```bash
-terraform apply --var-file dev_env.tfvars
-terraform apply --var-file test_env.tfvars
-terraform apply --var-file prod_env.tfvars
+[for i in docker_container.nginx_container[*] : join(":", [i.ip_address], [i.ports[0]["external"]])]
+
+[for i in docker_container.nginx_container[*] : join(":", [i.ip_address], i.ports[*]["external"])]
+```
+
+## Tainting a Source
+
+- If we want to force some resource to reload and reinstall,
+  then we just use tainting
+
+[Tainting](https://www.terraform.io/docs/cli/commands/taint.html)
+
+```bash
+terraform taint random_string.random[0] #just tainted a resource
+
+terraform untaint random_string.random[0] #just untainted a resource
+```
+
+## State Locking and Breaking State
+
+```bash
+terraform apply -lock=false #we just unlock the state
+                            # default is lock=true
+```
+
+## Terraform Import
+
+[Terraform Import](https://www.terraform.io/docs/cli/import/index.html)
+
+- if we have more resources out of state, we can include them
+  to our state file with import command
+
+- first we add resources to our .tf file, then use terraform import <resource_id> command
+
+```bash
+terraform import docker_container.nginx_container-2 $(docker inspect -f {{.ID}} nginx-yrwl)
+```
+
+[]()
+
+```hcl
+
 ```
 
 ```bash
 
 ```
 
-```bash
+[]()
+
+```hcl
 
 ```
 
 ```bash
+
+```
+
+[]()
+
+```hcl
 
 ```
 
