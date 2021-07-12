@@ -437,12 +437,26 @@ resource "null_resource" "dockervol" {
 [Local Values](https://www.terraform.io/docs/language/values/locals.html)
 
 ```hcl
+locals {
+  container_count = length(var.ext_port)
+}
 
+resource "docker_container" "nginx_container" {
+  count = local.container_count
+  name  = join("-", ["nginx", random_string.random[count.index].result])
+  image = docker_image.nginx_image.latest
+  ports {
+    internal = var.int_port
+    external = var.ext_port[count.index]
+  }
+  volumes {
+    container_path = "/data"
+    host_path      = "/home/mustafa/Terraform/terraform-docker/nginxvol"
+  }
+}
 ```
 
-```bash
-
-```
+``
 
 ##
 
