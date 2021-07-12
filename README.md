@@ -363,6 +363,15 @@ variable "ext_port" {
     error_message = "The External port must be 80."
   }
 }
+
+variable "int_port" {
+  type    = number
+  default = 80
+  validation {
+    condition     = var.int_port <= 65535 && var.int_port > 0
+    error_message = "The internal port must be in the valid port range 0 - 65535."
+  }
+}
 ```
 
 ```bash
@@ -376,45 +385,56 @@ The External port must be 80.
 This was checked by the validation rule at main.tf:14,3-13.
 ```
 
-##
+## Sensitive Variables and .tfvars file
 
-[]()
+[Sensivite Variables](https://www.terraform.io/docs/language/values/variables.html#suppressing-values-in-cli-output)
+
+- we just define variables in variables.tf file and put sensitive variables in to .tfvars file
 
 ```hcl
-
+variable "ext_port" {
+  type      = number
+  sensitive = true
+}
 ```
 
 ```bash
 
 ```
 
-##
+## Variable Definition Precedence
 
-[]()
+[link](https://www.terraform.io/docs/language/values/variables.html#variable-definition-precedence)
 
-```hcl
+Terraform loads variables in the following order, with later sources taking precedence over earlier ones:
 
-```
-
-```bash
-
-```
-
-##
-
-[]()
-
-```hcl
-
-```
+- Environment variables
+- The terraform.tfvars file, if present.
+- The terraform.tfvars.json file, if present.
+- Any _.auto.tfvars or _.auto.tfvars.json files, processed in lexical order of their filenames.
+- Any -var and -var-file options on the command line, in the order they are provided. (This includes variables set by a Terraform Cloud workspace.)
 
 ```bash
+terraform plan --var-file=centraf.tf #we just used anothter .tfvars file
 
+terraform plan -var ext_port=1980 # we just mention our vars on cli
 ```
 
-##
+## Local Exec Provisioner
 
-[]()
+[Local-Exec Provisioner](https://www.terraform.io/docs/language/resources/provisioners/local-exec.html)
+
+```hcl
+resource "null_resource" "dockervol" {
+  provisioner "local-exec" {
+    command = "mkdir nginxvol/ || true && sudo chown -R 1000:1000 nginxvol/"
+  }
+}
+```
+
+## Utilizing Local Values
+
+[Local Values](https://www.terraform.io/docs/language/values/locals.html)
 
 ```hcl
 
