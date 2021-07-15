@@ -517,6 +517,44 @@ resource "docker_image" "nginx_image" {
 
 ## Terraform Workspaces
 
+[Workspace](https://www.terraform.io/docs/language/state/workspaces.html)
+
+- we can also use workspace as a variable inside of resources and locals
+
+```hcl
+locals {
+  container_count = length(lookup(var.ext_port, terraform.workspace))
+}
+
+resource "docker_container" "nginx_container" {
+  count = local.container_count
+  name  = join("-", ["nginx", terraform.workspace, random_string.random[count.index].result])
+  image = docker_image.nginx_image.latest
+  ports {
+    internal = var.int_port
+    external = lookup(var.ext_port, terraform.workspace)[count.index]
+  }
+  volumes {
+    container_path = "/data"
+    host_path      = "${path.cwd}/nginxvol"
+  }
+}
+
+```
+
+```bash
+terraform workspace new dev # create a new called dev workspace and switch to it.
+
+terraform workspace show #show the current working workspace
+
+terraform workspace list # list all workspace
+
+terraform select workspace dev # switch the dev ws.
+
+```
+
+## Terraform Modules
+
 []()
 
 ```hcl
@@ -527,28 +565,21 @@ resource "docker_image" "nginx_image" {
 
 ```
 
-##
+## Terraform Graph
 
-[]()
-
-```hcl
-
-```
-
-```bash
-
-```
-
-##
-
-[]()
+- shows our infra with graph
+  []()
 
 ```hcl
 
 ```
 
 ```bash
+sudo apt install graphviz # install graph program
 
+terraform graph | dot -Tpdf > graph-plan.pdf # we can save our graph in a pdf file
+
+terraform graph -type=plan=destroy | dot -Tpdf > graph-destroy.pdf # we just create a destroy graph
 ```
 
 ##
