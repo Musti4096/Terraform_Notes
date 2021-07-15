@@ -582,40 +582,59 @@ terraform graph | dot -Tpdf > graph-plan.pdf # we can save our graph in a pdf fi
 terraform graph -type=plan=destroy | dot -Tpdf > graph-destroy.pdf # we just create a destroy graph
 ```
 
-##
+## Flatten Function
 
-[]()
+[Flatten](https://www.terraform.io/docs/language/functions/flatten.html)
+
+- show seperated list values into a one list.
 
 ```hcl
+output "IP-Address" {
+  value       = flatten(module.container[*].ip-address)
+  description = "IP address of container."
+}
+
+```
+
+## Lifecycle on Terraform
+
+[Lifecycle](https://www.terraform.io/docs/language/meta-arguments/lifecycle.html)
+
+```hcl
+resource "docker_volume" "container_volume" {
+  name = "${var.name_in}-volume"
+  lifecycle {
+    prevent_destroy = true
+  }
+}
 
 ```
 
 ```bash
-
+terraform destroy -target=module.container[0].docker_container.nginx_container #destroy just specific resource
 ```
 
-##
+## Terraform for_each parameter
 
-[]()
+[for each](https://www.terraform.io/docs/language/meta-arguments/for_each.html)
 
 ```hcl
+locals {
+  deployment = {
+    nginx = {
+      image = var.image["nginx"][terraform.workspace]
+    }
+    influxdb = {
+      image = var.image["influxdb"][terraform.workspace]
+    }
+  }
+}
 
-```
-
-```bash
-
-```
-
-##
-
-[]()
-
-```hcl
-
-```
-
-```bash
-
+module "image" {
+  source   = "./image"
+  for_each = local.deployment
+  image_in = each.value.image
+}
 ```
 
 ##
