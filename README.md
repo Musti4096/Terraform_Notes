@@ -456,7 +456,88 @@ resource "docker_container" "nginx_container" {
 }
 ```
 
-``
+## Min and Max Functions and Expand Expression
+
+[Min and Max](https://www.terraform.io/docs/language/functions/min.html)
+
+```hcl
+max([10,20,30]...) > 30
+
+variable "ext_port" {
+  type = list(any)
+
+  validation {
+    condition     = max(var.ext_port...) <= 65535 && min(var.ext_port...) > 0
+    error_message = "The internal port must be in the valid port range 0 - 65535."
+  }
+}
+```
+
+## Path References and String Interpolations
+
+[Path references](https://www.terraform.io/docs/language/expressions/references.html#filesystem-and-workspace-info)
+
+[Interpolation](https://www.terraform.io/docs/language/expressions/strings.html#interpolation)
+
+```hcl
+resource "docker_container" "nginx_container" {
+  count = local.container_count
+  name  = join("-", ["nginx", random_string.random[count.index].result])
+  image = docker_image.nginx_image.latest
+  ports {
+    internal = var.int_port
+    external = var.ext_port[count.index]
+  }
+  volumes {
+    container_path = "/data"
+    host_path      = "${path.cwd}/nginxvol"
+  }
+}
+```
+
+## Maps and LookUps
+
+[Map](https://www.terraform.io/docs/language/functions/map.html)
+[Lookup](https://www.terraform.io/docs/language/functions/lookup.html)
+
+```hcl
+variable "image" {
+  type        = map(any)
+  description = "image for container"
+  default = {
+    dev  = "nginx:latest"
+    prod = "nginx:alpine"
+  }
+}
+
+resource "docker_image" "nginx_image" {
+  name = lookup(var.image, var.env)
+}
+```
+
+## Terraform Workspaces
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
 
 ##
 
@@ -481,6 +562,152 @@ resource "docker_container" "nginx_container" {
 ```bash
 
 ```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
+
+[]()
+
+```hcl
+
+```
+
+```bash
+
+```
+
+##
 
 []()
 
