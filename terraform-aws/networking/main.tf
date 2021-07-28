@@ -19,6 +19,9 @@ resource "aws_vpc" "mustafa_vpc" {
   tags = {
     Name = "mustafa-vpc-${random_integer.random.id}"
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_subnet" "mustafa_public_subnet" {
