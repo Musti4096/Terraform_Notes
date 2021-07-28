@@ -637,16 +637,13 @@ module "image" {
 }
 ```
 
-##
+## cidrsubnet Function
 
-[]()
+[cidrsubnet function](https://www.terraform.io/docs/language/functions/cidrsubnet.html)
 
 ```hcl
-
-```
-
-```bash
-
+public_cidrs = [for i in range(2, 255, 2): cidrsubnet("10.123.0.0/16", 8, i)]
+private_cidrs = [for i in range(1, 255, 2): cidrsubnet("10.123.0.0/16", 8, i)]
 ```
 
 ##
