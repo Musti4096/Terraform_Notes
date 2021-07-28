@@ -104,3 +104,13 @@ resource "aws_security_group" "mustafa_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_db_subnet_group" "rds_subnetgroup" {
+  count      = var.db_subnet_group == true ? 1 : 0 #var.db_subnet_group ? 1 : 0
+  name       = "mustafa_rds_subnetgroup"
+  subnet_ids = aws_subnet.mustafa_private_subnet.*.id
+
+  tags = {
+    "Name" = "mustafa_rds_sng"
+  }
+}
