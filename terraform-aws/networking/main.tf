@@ -89,7 +89,7 @@ resource "aws_security_group" "mustafa_sg" {
   description = each.value.description
   vpc_id      = aws_vpc.mustafa_vpc.id
   dynamic "ingress" {
-    for_each    = each.value.ingress
+    for_each = each.value.ingress
     content {
       from_port   = ingress.value.from
       to_port     = ingress.value.to
