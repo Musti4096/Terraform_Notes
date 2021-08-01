@@ -1,6 +1,6 @@
-# Terraform Notes
+# Terraform Notes 
 
-## Terraform Lock Hcl file
+## Terraform Lock HCL file
 
 it locks all versions for us.
 
