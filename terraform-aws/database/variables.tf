@@ -29,3 +29,7 @@ variable "skip_db_snapshot" {
 variable "db_tag_name" {
 
 }
+
+variable "db_identifier" {
+  
+}

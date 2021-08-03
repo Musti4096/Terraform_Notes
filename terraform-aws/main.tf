@@ -21,8 +21,8 @@ module "database" {
   db_name                = var.dbname
   db_username            = var.dbusername
   db_password            = var.dbpassword
-  db_subnet_group_name   = module.db_subnet_group_name[0]
-  vpc_security_group_ids = module.db_security_group_ids
+  db_subnet_group_name   = module.networking.db_subnet_group_name[0]
+  vpc_security_group_ids = module.networking.db_security_group_ids
   db_identifier          = "mustafa-db"
   skip_db_snapshot       = true
   db_tag_name            = "RDS-DB"
