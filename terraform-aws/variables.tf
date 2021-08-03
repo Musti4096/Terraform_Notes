@@ -9,18 +9,18 @@ variable "access_ip" {
 #---- database variables ----#
 
 variable "dbname" {
-  type = string
+  type        = string
   description = "DB name"
 }
 
 variable "dbusername" {
-  type = string
+  type        = string
   description = "DB username"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "dbpassword" {
-  type = string
+  type        = string
   description = "database password"
-  sensitive = true
+  sensitive   = true
 }
