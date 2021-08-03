@@ -6,3 +6,8 @@ variable "aws_region" {
 variable "access_ip" {
   type = string
 }
+variable "dbname" {}
+
+variable "dbusername" {}
+
+variable "dbpassword" {}
