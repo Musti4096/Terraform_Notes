@@ -21,8 +21,9 @@ module "database" {
   db_name               = "rancher"
   db_username           = "mustafa"
   db_password           = "pass12345"
-  db_subnet_group_name  = ""
-  vpc_security_group_id = []
+  db_subnet_group_name  = module.db_subnet_group_name[0]
+  vpc_security_group_ids = module.db_security_group_ids
   db_identifier         = "mustafa-db"
-  skip_final_snapshot   = true
+  skip_db_snapshot      = true
+  db_tag_name           = "RDS-DB"
 }
