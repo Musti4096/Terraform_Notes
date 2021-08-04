@@ -27,3 +27,9 @@ module "database" {
   skip_db_snapshot       = true
   db_tag_name            = "RDS-DB"
 }
+
+module "loadbalancing" {
+  source         = "./loadbalancing"
+  public_sg      = module.networking.public_sg
+  public_subnets = module.networking.public_subnets
+}
