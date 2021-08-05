@@ -50,5 +50,5 @@ resource "aws_lb_target_group_attachement" "mustafa_tg_attachment" {
   count            = var.instance_count
   target_group_arn = var.lb_target_group_arn
   target_id        = aws_instance.mustafa_node[count.index].id
-  port             = 8000
+  port             = var.tg_port
 }
