@@ -58,5 +58,4 @@ module "compute" {
   dbpassword          = var.dbpassword
   db_endpoint         = module.database.db_endpoint
   lb_target_group_arn = module.loadbalancing.lb_target_group_arn
-
 }
