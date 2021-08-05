@@ -52,4 +52,10 @@ module "compute" {
   vol_size        = 10
   key_name        = "keymustafa"
   public_key_path = "/home/mustafa/workspace/Terraform_Notes/terraform-aws/compute/keymustafa.pub"
+  user_data_path  = "${path.root}/userdata.tpl"
+  dbname          = var.dbname
+  dbuser          = var.dbusername
+  dbpassword      = var.dbpassword
+  db_endpoint     = module.database.db_endpoint
+
 }
