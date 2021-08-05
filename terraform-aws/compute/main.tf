@@ -21,11 +21,16 @@ resource "aws_instance" "mustafa_node" {
   tags = {
     Name = "mustafa-node-${random_id.mustafa_node_id[count.index].dec}"
   }
-  #key_name = ""
+  key_name               = aws_key_pair.pc_auth.id
   vpc_security_group_ids = [var.pubic_sg]
   subnet_id              = var.public_subnets[count.index]
   # user_data = ""
   root_block_device {
     volume_size = var.vol_size #10
   }
+}
+
+resource "aws_key_pair" "pc_auth" {
+  key_name   = var.key_name
+  public_key = file(var.public_key_path)
 }
