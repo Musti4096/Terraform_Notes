@@ -44,18 +44,19 @@ module "loadbalancing" {
 }
 
 module "compute" {
-  source          = "./compute"
-  instance_count  = 1
-  instance_type   = t3.micro
-  public_sg       = module.networking.public_sg
-  public_subnets  = module.networking.public_subnets
-  vol_size        = 10
-  key_name        = "keymustafa"
-  public_key_path = "/home/mustafa/workspace/Terraform_Notes/terraform-aws/compute/keymustafa.pub"
-  user_data_path  = "${path.root}/userdata.tpl"
-  dbname          = var.dbname
-  dbuser          = var.dbusername
-  dbpassword      = var.dbpassword
-  db_endpoint     = module.database.db_endpoint
+  source              = "./compute"
+  instance_count      = 1
+  instance_type       = t3.micro
+  public_sg           = module.networking.public_sg
+  public_subnets      = module.networking.public_subnets
+  vol_size            = 10
+  key_name            = "keymustafa"
+  public_key_path     = "/home/mustafa/workspace/Terraform_Notes/terraform-aws/compute/keymustafa.pub"
+  user_data_path      = "${path.root}/userdata.tpl"
+  dbname              = var.dbname
+  dbuser              = var.dbusername
+  dbpassword          = var.dbpassword
+  db_endpoint         = module.database.db_endpoint
+  lb_target_group_arn = module.loadbalancing.lb_target_group_arn
 
 }
