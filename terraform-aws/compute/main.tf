@@ -23,7 +23,7 @@ resource "aws_instance" "mustafa_node" {
   }
   #key_name = ""
   vpc_security_group_ids = [var.pubic_sg]
-  subnet_id              = var.pbulic_subnets[count.index]
+  subnet_id              = var.public_subnets[count.index]
   # user_data = ""
   root_block_device {
     volume_size = var.vol_size #10
